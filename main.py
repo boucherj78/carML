@@ -4,52 +4,42 @@ import random
 from pygame.locals import *
 import time
 from classes import *
+import cv2 as cv
 
-SCREENRECT = pg.Rect(0, 0, 640, 480)
+SCREENRECT = pg.Rect(0, 0, 683, 384)
+
+def get_grid(img):
+    im_gray = cv.imread(img, cv.IMREAD_GRAYSCALE)
+    im_bw = cv.threshold(im_gray, 127, 255, cv.THRESH_BINARY)[1]
+    return im_bw
+
 
 if __name__ == '__main__':
     # Initialize pygame
+    # car_array = cv.imread('img/parcours_1.jpg', CV_LOAD_IMAGE_GRAYSCALE)
 
+    grid = get_grid('img/parcours_1.jpg')
     pg.init()
-    screen = pg.display.set_mode((640, 480))
+    screen = pg.display.set_mode((683, 384))
+    background = pg.image.load('img/parcours_1.jpg').convert()
 
-    random.seed(a=55555)
-    cars = [Car(random.randint(0,640),random.randint(0,480),random.random()*2,random.random()*2) for i in range(5)]
-    for c in cars:
-        c.display()
-
-    time.sleep(5)
-
-screen = pygame.display.set_mode((640, 480))
-    >> > player = pygame.image.load('player.bmp').convert()
-    >> > background = pygame.image.load('background.bmp').convert()
-    >> > screen.blit(background, (0, 0))
-    >> > objects = []
-    >> > for x in range(10):  # create 10 objects</i>
-        ...
-        o = GameObject(player, x * 40, x)
-    ...
-    objects.append(o)
-    >> > while 1:
-        ...
-        for event in pygame.event.get():
-            ...
-        if event.type in (QUIT, KEYDOWN):
-            ...
-        sys.exit()
-    ...
-    for o in objects:
-        ...
-        screen.blit(background, o.pos, o.pos)
-    ...
-    for o in objects:
-        ...
-        o.move()
-    ...
-    screen.blit(o.image, o.pos)
-    ...
-    pygame.display.update()
-    ...
-    pygame.time.delay(100)
-
-
+    random.seed(a=2324)
+    cars = [Car(random.randint(0, 300), random.randint(0, 150), 1 + random.random() * 2, 1 + random.random() * 2, 'img/car.jpg')
+            for i in range(5)]
+    dead = []
+    while True:
+        screen.blit(background, (0, 0))
+        print('-------------------')
+        temp = []
+        for c in cars:
+            c.move()
+            c.display(screen)
+            if not c.isdead(grid):
+                temp.append(c)
+                print(c)
+                c.get_distance_from_captor(grid)
+            else:
+                dead.append(c)
+        cars = temp
+        pg.display.update()
+        pg.time.delay(1000)
